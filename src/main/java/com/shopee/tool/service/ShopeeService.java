@@ -6,8 +6,10 @@ import domain.shopee.response.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.scheduling.annotation.Async;
@@ -23,7 +25,10 @@ public class ShopeeService {
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
 
-    @KafkaListener(topics = "login-request", groupId = "group_id")
+    @Value("${cloud.topic.username.response}")
+    private String usernameResponse;
+
+    @KafkaListener(topics = "${cloud.topic.login.request}", groupId = "shopee")
     @Async
     public void login(String msg,
                       @Header(KafkaHeaders.RECEIVED_PARTITION_ID) List<Integer> partitions,
@@ -42,11 +47,10 @@ public class ShopeeService {
         } catch (Exception e) {
 
         }
-        log.info("Login response: ");
-        this.kafkaTemplate.send("login-response", response.toString());
+        this.kafkaTemplate.send("${cloud.topic.login.response}", response.toString());
     }
 
-    @KafkaListener(topics = "otp-request", groupId = "group_id")
+    @KafkaListener(topics = "${cloud.topic.otp.request}", groupId = "shopee")
     @Async
     public void getOtp(String msg,
                        @Header(KafkaHeaders.RECEIVED_PARTITION_ID) List<Integer> partitions,
@@ -64,10 +68,10 @@ public class ShopeeService {
             log.error(e.getMessage());
         }
         log.info("Get otp response: " + otpResponse.toString());
-        this.kafkaTemplate.send("otp-response", otpResponse.toString());
+        this.kafkaTemplate.send("${cloud.topic.otp.response}", otpResponse.toString());
     }
 
-    @KafkaListener(topics = "follow-request", groupId = "group_id")
+    @KafkaListener(topics = "${cloud.topic.follow.request}", groupId = "shopee")
     @Async
     public void follow(String msg,
                        @Header(KafkaHeaders.RECEIVED_PARTITION_ID) List<Integer> partitions,
@@ -85,31 +89,46 @@ public class ShopeeService {
             log.error(e.getMessage());
         }
         log.info("Follow response: " + followResponse.toString());
-        this.kafkaTemplate.send("follow-response", followResponse.toString());
+        this.kafkaTemplate.send("${cloud.topic.follow.response}", followResponse.toString());
     }
 
 
-    @KafkaListener(topics = "get-username-request", groupId = "group_id")
+    @KafkaListener(topics = "${cloud.topic.username.request}", groupId = "shopee")
     @Async
     public void getIdsByUsername(String msg,
                        @Header(KafkaHeaders.RECEIVED_PARTITION_ID) List<Integer> partitions,
                        @Header(KafkaHeaders.RECEIVED_TOPIC) List<String> topics,
-                       @Header(KafkaHeaders.OFFSET) List<Long> offsets) {
-        GetIdsByUsernameShopeeResponse response = new GetIdsByUsernameShopeeResponse();
+                       @Header(KafkaHeaders.OFFSET) List<Long> offsets,
+                                 Acknowledgment acknowledgment) {
+        acknowledgment.acknowledge();
+        GetIdByUsernameKafkaResponse response = new GetIdByUsernameKafkaResponse();
         try {
             String msgTemp = String.valueOf(msg);
-            log.info("Get ip by username request: " + msg);
+            Gson requestGson = new Gson();
+            GetInformationRequest request = requestGson.fromJson(msgTemp, GetInformationRequest.class);
+            log.info("Get ip by username request: " + request);
             Ids ids = new Ids();
-            response =  ids.getIdsByUsername(msgTemp);
+            GetIdsByUsernameShopeeResponse getIdsByUsernameShopeeResponse =  ids.getIdsByUsername(request.getUsername());
+            response.setId(request.getId());
+            response.setError(getIdsByUsernameShopeeResponse.getError() == null ? "": getIdsByUsernameShopeeResponse.getError());
+            response.setError_msg(getIdsByUsernameShopeeResponse.getError_msg() == null ? "" : getIdsByUsernameShopeeResponse.getError_msg() );
+            response.setVersion(getIdsByUsernameShopeeResponse.getVersion() == null ? "" : getIdsByUsernameShopeeResponse.getVersion());
+            response.setAddress(getIdsByUsernameShopeeResponse.getData().getShop_location() ==  null ? "" : getIdsByUsernameShopeeResponse.getData().getShop_location());
+            response.setFollow(getIdsByUsernameShopeeResponse.getData().getAccount().getFollowing_count() == null ? "" :getIdsByUsernameShopeeResponse.getData().getAccount().getFollowing_count());
+            response.setFollowing(getIdsByUsernameShopeeResponse.getData().getFollower_count() == null ? "" :getIdsByUsernameShopeeResponse.getData().getFollower_count().toString());
+            response.setRate(getIdsByUsernameShopeeResponse.getData().getRating_star() == null ? "" : getIdsByUsernameShopeeResponse.getData().getRating_star().toString());
+            response.setProduct(getIdsByUsernameShopeeResponse.getData().getItem_count() == null ? "" : getIdsByUsernameShopeeResponse.getData().getItem_count().toString());
+            response.setShopId(getIdsByUsernameShopeeResponse.getData().getShopid() == null ? "" : getIdsByUsernameShopeeResponse.getData().getShopid().toString() );
+            response.setName(getIdsByUsernameShopeeResponse.getData().getName() == null ? "" : getIdsByUsernameShopeeResponse.getData().getName());
         } catch (Exception e) {
             log.error(e.getMessage());
         }
         log.info("Get ip by username response: " + response.toString());
-        this.kafkaTemplate.send("get-username-request", response.toString());
+        this.kafkaTemplate.send(usernameResponse, response.toString());
     }
 
 
-    @KafkaListener(topics = "information-shop-request", groupId = "group_id")
+    @KafkaListener(topics = "${cloud.topic.information-shop.request}", groupId = "shopee")
     @Async
     public void getInformationShop(String msg,
                                  @Header(KafkaHeaders.RECEIVED_PARTITION_ID) List<Integer> partitions,
@@ -125,10 +144,10 @@ public class ShopeeService {
             log.error(e.getMessage());
         }
         log.info("Information shop response: " + response.toString());
-        this.kafkaTemplate.send("information-shop-response", response.toString());
+        this.kafkaTemplate.send("${cloud.topic.information-shop.response}", response.toString());
     }
 
-    @KafkaListener(topics = "items-shop-request", groupId = "group_id")
+    @KafkaListener(topics = "${cloud.topic.items-shop.request}", groupId = "shopee")
     @Async
     public void getItemShop(String msg,
                                    @Header(KafkaHeaders.RECEIVED_PARTITION_ID) List<Integer> partitions,
@@ -146,10 +165,10 @@ public class ShopeeService {
             log.error(e.getMessage());
         }
         log.info("Get item shop response: " + response.toString());
-        this.kafkaTemplate.send("item-shop-response", response.toString());
+        this.kafkaTemplate.send("${cloud.topic.login.response}", response.toString());
     }
 
-    @KafkaListener(topics = "like-item-request", groupId = "group_id")
+    @KafkaListener(topics = "${cloud.topic.like-item.request}", groupId = "shopee")
     @Async
     public void LikeItem(String msg,
                             @Header(KafkaHeaders.RECEIVED_PARTITION_ID) List<Integer> partitions,
@@ -170,7 +189,7 @@ public class ShopeeService {
         this.kafkaTemplate.send("like-item-response", response.toString());
     }
 
-    @KafkaListener(topics = "unfollow-request", groupId = "group_id")
+    @KafkaListener(topics = "${cloud.topic.unfollow.request}", groupId = "shopee")
     @Async
     public void unfollow (String msg,
                          @Header(KafkaHeaders.RECEIVED_PARTITION_ID) List<Integer> partitions,
@@ -191,7 +210,7 @@ public class ShopeeService {
         this.kafkaTemplate.send("unfollow-response", response.toString());
     }
 
-    @KafkaListener(topics = "unlike-request", groupId = "group_id")
+    @KafkaListener(topics = "${cloud.topic.unlike.request}", groupId = "shopee")
     @Async
     public void unlike (String msg,
                           @Header(KafkaHeaders.RECEIVED_PARTITION_ID) List<Integer> partitions,
@@ -212,7 +231,7 @@ public class ShopeeService {
         this.kafkaTemplate.send("unlike-response", response.toString());
     }
 
-    @KafkaListener(topics = "view-request", groupId = "group_id")
+    @KafkaListener(topics = "${cloud.topic.view.request}", groupId = "shopee")
     @Async
     public void view (String msg,
                         @Header(KafkaHeaders.RECEIVED_PARTITION_ID) List<Integer> partitions,

@@ -2,22 +2,44 @@ server:
     port: 2000
 spring:
     kafka:
-        bootstrap-servers: 103.56.157.225:9092
+        bootstrap-servers: localhost:9092
         consumer:
             auto-offset-reset: latest
-            group-id: group_id
-            properties: {spring: {json: {trusted: {packages: me.hanv.tool}}}}
+            group-id: shopee
+            properties: {spring: {json: {trusted: {packages: com.shopee.tool}}}}
             value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            enable.auto.commit : false
         producer:
             value-serializer: org.apache.kafka.common.serialization.StringSerializer
 cloud:
     topic:
         login:
-          request: login-request
-          response: login-response
-        charge:
-          request: charge-request
-          response: charge-response
-        change-ip:
-          request: change-ip-request
-          response: change-ip-response
+            request: login-request
+            response: login-response
+        otp:
+            request: otp-request
+            response: otp-response
+        follow:
+            request: follow-request
+            response: follow-response
+        username:
+            request: get-username-request
+            response: get-username-response
+        information-shop:
+            request: information-shop-request
+            response: information-shop-response
+        items-shop:
+            request: items-shop-request
+            response: items-shop-response
+        like-item:
+            request: like-item-request
+            response: like-item-response
+        unfollow:
+            request: unfollow-request
+            response: unfollow-response
+        unlike:
+            request: unlike-request
+            response: unlike-response
+        view:
+            request: view-request
+            response: view-response
