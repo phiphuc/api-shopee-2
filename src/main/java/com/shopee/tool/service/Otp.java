@@ -105,8 +105,5 @@ public class Otp {
 
     }
 
-    public static void main(String[] args) throws URISyntaxException, UnsupportedEncodingException {
-        Otp otp = new Otp();
-        otp.getOtp(new OtpRequest("84369264578","Phiphuc1994@"));
-    }
+
 }

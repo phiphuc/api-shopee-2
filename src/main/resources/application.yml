@@ -1,16 +1,16 @@
 server:
     port: 2000
 spring:
-    kafka:
-        bootstrap-servers: localhost:9092
-        consumer:
-            auto-offset-reset: latest
-            group-id: shopee
-            properties: {spring: {json: {trusted: {packages: com.shopee.tool}}}}
-            value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-            enable.auto.commit : false
-        producer:
-            value-serializer: org.apache.kafka.common.serialization.StringSerializer
+#    kafka:
+#        bootstrap-servers: localhost:9092
+#        consumer:
+#            auto-offset-reset: latest
+#            group-id: shopee
+#            properties: {spring: {json: {trusted: {packages: com.shopee.tool}}}}
+#            value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#            enable.auto.commit : false
+#        producer:
+#            value-serializer: org.apache.kafka.common.serialization.StringSerializer
 cloud:
     topic:
         login:

@@ -12,6 +12,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -94,13 +95,11 @@ public class ShopeeService {
 
 
     @KafkaListener(topics = "${cloud.topic.username.request}", groupId = "shopee")
-    @Async
-    public void getIdsByUsername(String msg,
+    @SendTo()
+    public String getIdsByUsername(String msg,
                        @Header(KafkaHeaders.RECEIVED_PARTITION_ID) List<Integer> partitions,
                        @Header(KafkaHeaders.RECEIVED_TOPIC) List<String> topics,
-                       @Header(KafkaHeaders.OFFSET) List<Long> offsets,
-                                 Acknowledgment acknowledgment) {
-        acknowledgment.acknowledge();
+                       @Header(KafkaHeaders.OFFSET) List<Long> offsets) {
         GetIdByUsernameKafkaResponse response = new GetIdByUsernameKafkaResponse();
         try {
             String msgTemp = String.valueOf(msg);
@@ -110,21 +109,34 @@ public class ShopeeService {
             Ids ids = new Ids();
             GetIdsByUsernameShopeeResponse getIdsByUsernameShopeeResponse =  ids.getIdsByUsername(request.getUsername());
             response.setId(request.getId());
-            response.setError(getIdsByUsernameShopeeResponse.getError() == null ? "": getIdsByUsernameShopeeResponse.getError());
-            response.setError_msg(getIdsByUsernameShopeeResponse.getError_msg() == null ? "" : getIdsByUsernameShopeeResponse.getError_msg() );
-            response.setVersion(getIdsByUsernameShopeeResponse.getVersion() == null ? "" : getIdsByUsernameShopeeResponse.getVersion());
-            response.setAddress(getIdsByUsernameShopeeResponse.getData().getShop_location() ==  null ? "" : getIdsByUsernameShopeeResponse.getData().getShop_location());
-            response.setFollow(getIdsByUsernameShopeeResponse.getData().getAccount().getFollowing_count() == null ? "" :getIdsByUsernameShopeeResponse.getData().getAccount().getFollowing_count());
-            response.setFollowing(getIdsByUsernameShopeeResponse.getData().getFollower_count() == null ? "" :getIdsByUsernameShopeeResponse.getData().getFollower_count().toString());
-            response.setRate(getIdsByUsernameShopeeResponse.getData().getRating_star() == null ? "" : getIdsByUsernameShopeeResponse.getData().getRating_star().toString());
-            response.setProduct(getIdsByUsernameShopeeResponse.getData().getItem_count() == null ? "" : getIdsByUsernameShopeeResponse.getData().getItem_count().toString());
-            response.setShopId(getIdsByUsernameShopeeResponse.getData().getShopid() == null ? "" : getIdsByUsernameShopeeResponse.getData().getShopid().toString() );
-            response.setName(getIdsByUsernameShopeeResponse.getData().getName() == null ? "" : getIdsByUsernameShopeeResponse.getData().getName());
+            if(!getIdsByUsernameShopeeResponse.getError().equals("0")){
+                response.setError(getIdsByUsernameShopeeResponse.getError() == null ? "": getIdsByUsernameShopeeResponse.getError());
+                response.setError_msg(getIdsByUsernameShopeeResponse.getError_msg() == null ? "" : getIdsByUsernameShopeeResponse.getError_msg() );
+                response.setVersion("");
+                response.setAddress("");
+                response.setFollow("");
+                response.setFollowing("");
+                response.setRate("");
+                response.setProduct("");
+                response.setShopId("");
+                response.setName("");
+            }else{
+                response.setError(getIdsByUsernameShopeeResponse.getError() == null ? "": getIdsByUsernameShopeeResponse.getError());
+                response.setError_msg(getIdsByUsernameShopeeResponse.getError_msg() == null ? "" : getIdsByUsernameShopeeResponse.getError_msg() );
+                response.setVersion(getIdsByUsernameShopeeResponse.getVersion() == null ? "" : getIdsByUsernameShopeeResponse.getVersion());
+                response.setAddress(getIdsByUsernameShopeeResponse.getData().getShop_location() ==  null ? "" : getIdsByUsernameShopeeResponse.getData().getShop_location());
+                response.setFollow(getIdsByUsernameShopeeResponse.getData().getAccount().getFollowing_count() == null ? "" :getIdsByUsernameShopeeResponse.getData().getAccount().getFollowing_count());
+                response.setFollowing(getIdsByUsernameShopeeResponse.getData().getFollower_count() == null ? "" :getIdsByUsernameShopeeResponse.getData().getFollower_count().toString());
+                response.setRate(getIdsByUsernameShopeeResponse.getData().getRating_star() == null ? "" : getIdsByUsernameShopeeResponse.getData().getRating_star().toString());
+                response.setProduct(getIdsByUsernameShopeeResponse.getData().getItem_count() == null ? "" : getIdsByUsernameShopeeResponse.getData().getItem_count().toString());
+                response.setShopId(getIdsByUsernameShopeeResponse.getData().getShopid() == null ? "" : getIdsByUsernameShopeeResponse.getData().getShopid().toString() );
+                response.setName(getIdsByUsernameShopeeResponse.getData().getName() == null ? "" : getIdsByUsernameShopeeResponse.getData().getName());
+            }
         } catch (Exception e) {
             log.error(e.getMessage());
         }
         log.info("Get ip by username response: " + response.toString());
-        this.kafkaTemplate.send(usernameResponse, response.toString());
+        return response.toString();
     }
 
 

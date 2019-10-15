@@ -43,9 +43,5 @@ public class Like {
         return likeResponse;
     }
 
-    public static void main(String[] args) {
-        Like like = new Like();
-        like.like(new LikeRequest("SPC_IA=-1; SPC_EC=\"xYaLh1KyzRVrLQxgKw7IijFXulse+GOLhvyxuCpJmM3zo+sb+kwmy4Kzmm42NSOS9tFCOIccDJngsv330NYfnALM3kgXwwMfkdMRkDXB+AZ6v1uLD9zS0/ZiG/rjhJwTBZuQZig8dtVjyBH7zfqIo7POkgpWQ10CoKlJlbWMsy0=\"; SPC_T_ID=\"V9BcagbFKqR3s0vnVGEWj/UErtOP3m0F9KA3f8cvn4OR/n68RKIWRs4Ey9h7Z/6cJVQg3Vb5m0U1SPNK1iWEdtrdrLLHDW3cFpzCxja2dv0=\"; SPC_SI=hwnc8zoivrpkatvpmhq2hevx7cb6fccs; SPC_U=110270449; SPC_T_IV=\"K/MP6XI5jmRYeSd/rEjwDw==\";csrftoken=FHTtimJaZnh2w73Zzx6RUtgFg8ODriti","6145207","2146050752"));
-    }
 
 }

@@ -62,8 +62,4 @@ public class Login {
 
     }
 
-    public static void main(String[] args) throws UnsupportedEncodingException, URISyntaxException {
-        Login login =  new Login();
-        login.getLogin(new LoginRequest("SPC_IA=-1; SPC_EC=-; SPC_F=XJAyBwGffVAjRJ5ViYGcgHIz5q21uCAA; REC_T_ID=f3b37e34-dbc5-11e9-909a-20283e97f268; SPC_T_ID=\"5oK0mye4HZgkQumJqT1Crs1sY3i2E8p0pkY32xNYXnNkJjH3VB76NQV23Biv8J+9fkASIgZ1AQt1tKwPW8ws75RMMKnx2WUvzeYNRnKSAiA=\"; SPC_SI=hwnc8zoivrpkatvpmhq2hevx7cb6fccs; SPC_U=-; SPC_T_IV=\"a9sX3tdmoBoyZHaspBiJwQ==\";csrftoken=FHTtimJaZnh2w73Zzx6RUtgFg8ODriti","84369264578","234650"));
-    }
 }

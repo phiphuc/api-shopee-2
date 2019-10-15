@@ -89,8 +89,5 @@ public class View {
         return array;
     }
 
-    public static void main(String[] args) throws URISyntaxException {
-        View view =new View();
-        view.view(new ViewRequest("",""));
-    }
+
 }
