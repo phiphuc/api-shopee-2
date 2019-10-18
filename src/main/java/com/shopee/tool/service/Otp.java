@@ -96,7 +96,12 @@ public class Otp {
             count+=1;
         }
         OtpResponse response = new OtpResponse();
-        String code = otpShopeeResponse.getError_msg().equals("error_need_otp") ? "0" : "1";
+        if(otpShopeeResponse.getErr().equals("error_limit")){
+            response.setErrorCode("3");
+            response.setMessage(otpShopeeResponse.getErr());
+            return response;
+        }
+        String code = otpShopeeResponse.getErr().equals("") ? "0" : (otpShopeeResponse.getError_msg().equals("error_need_otp") ? "0" : "1");
         response.setErrorCode(code);
         response.setMessage(otpShopeeResponse.getError_msg());
         response.setCookie(cookie);
