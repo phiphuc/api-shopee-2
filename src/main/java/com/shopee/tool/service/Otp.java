@@ -101,7 +101,7 @@ public class Otp {
             response.setMessage(otpShopeeResponse.getErr());
             return response;
         }
-        String code = otpShopeeResponse.getErr().equals("") ? "0" : (otpShopeeResponse.getError_msg().equals("error_need_otp") ? "0" : "1");
+        String code = otpShopeeResponse.getErr().equals("") ? "0" : (otpShopeeResponse.getErr().equals("error_need_otp") ? "0" : "1");
         response.setErrorCode(code);
         response.setMessage(otpShopeeResponse.getError_msg());
         response.setCookie(cookie);
