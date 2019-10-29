@@ -25,15 +25,34 @@ public class ShopeeService {
                       @Header(KafkaHeaders.RECEIVED_TOPIC) List<String> topics,
                       @Header(KafkaHeaders.OFFSET) List<Long> offsets) {
 
-        LoginResponse response = new LoginResponse();
+        LoginResponse loginResponse = new LoginResponse();
+        InformationShopeeResponse response = new InformationShopeeResponse();
         try {
             String msgTemp = String.valueOf(msg);
             log.info("Login request: " + msg);
             Gson requestGson = new Gson();
             LoginRequest loginRequest = requestGson.fromJson(msgTemp, LoginRequest.class);
             Login login = new Login();
-            response = login.getLogin(loginRequest);
-            response.setId(loginRequest.getId());
+            loginResponse = login.getLogin(loginRequest);
+            loginResponse.setId(loginRequest.getId());
+            if(loginResponse.getError() != 0){
+                response.setError(loginResponse.getError());
+                response.setCookie(loginResponse.getCookie());
+                response.setId(loginResponse.getId());
+                response.setPhone("");
+                response.setEmail("");
+                response.setUsername("");
+                response.setHas_password("");
+                response.setPhone_verified(false);
+                return response.toString();
+            }
+
+            InformationShop informationShop = new InformationShop();
+
+            response =  informationShop.getInformationWithCookie(loginResponse.getCookie());
+            response.setError(loginResponse.getError());
+            response.setCookie(loginResponse.getCookie());
+            response.setId(loginResponse.getId());
         } catch (Exception e) {
             log.error("Login error "+e.getMessage());
         }
